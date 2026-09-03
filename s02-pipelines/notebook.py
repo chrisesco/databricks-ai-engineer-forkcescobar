@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "5"
+# ///
 # MAGIC %md
 # MAGIC # Sesión 2 · Pipelines de datos (ETL) que alimentan la IA
 # MAGIC **Databricks AI Engineer** — caso Neptuno
