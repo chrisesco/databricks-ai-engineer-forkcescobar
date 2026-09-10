@@ -1,0 +1,39 @@
+supervisor:
+  name: s05-vigia-normativa-sbs
+  description: >-
+    Agente de solo lectura para consultar versiones y cambios de normativa SBS peruana,
+    siempre con citas a fuente y versión.
+  instructions:
+    - Nunca presentar un fixture como texto legal consolidado.
+    - No afirmar vigencia sin consultar estado, fecha y fuente oficial.
+    - Delegar cada pregunta al subagente más específico.
+    - Si falta evidencia, abstenerse y explicar qué dato falta.
+    - No entregar asesoría legal o financiera personalizada.
+  subagents:
+    - id: historial
+      type: custom_agent_endpoint
+      description: Lista normas, versiones, modificatorias, derogaciones y fechas de vigencia.
+      tools: [buscar_norma, listar_versiones]
+      permissions: [CAN_QUERY]
+    - id: comparador
+      type: custom_agent_endpoint
+      description: Compara dos versiones por artículo y clasifica agregado, eliminado o modificado.
+      tools: [comparar_versiones, buscar_cambios]
+      permissions: [CAN_QUERY]
+    - id: corroborador
+      type: custom_agent_endpoint
+      description: Verifica el artículo, página, hash y URL oficial antes de responder.
+      tools: [corroborar]
+      permissions: [CAN_QUERY]
+  tools:
+    - id: ultima_version
+      type: unity_catalog_function
+      permissions: [EXECUTE]
+    - id: buscar_norma
+      type: unity_catalog_function
+      permissions: [EXECUTE]
+
+# Provisioning options:
+# 1) UI: Agents → Create Agent → Supervisor Agent → add subagents/tools.
+# 2) SDK: WorkspaceClient().supervisor_agents.create_supervisor_agent(...), then create_tool.
+# 3) Custom Databricks App: expose SUBAGENTS as Responses API tools when custom routing is needed.

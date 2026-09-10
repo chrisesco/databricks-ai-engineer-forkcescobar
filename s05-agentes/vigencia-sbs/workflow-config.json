@@ -1,0 +1,38 @@
+{
+  "name": "S05 Vigía SBS · metadata-driven",
+  "parameters": [
+    {"name": "catalogo", "default": "neptuno_manuel_arguelles"},
+    {"name": "embedding_endpoint", "default": "databricks-qwen3-embedding-0-6b"}
+  ],
+  "tasks": [
+    {
+      "task_key": "discover_pending",
+      "sql_task": {
+        "warehouse_id": "<SERVERLESS_SQL_WAREHOUSE_ID>",
+        "query": "SELECT doc_id FROM {{job.parameters.catalogo}}.s05_vigencia_sbs.documentos_pendientes WHERE estado_proceso = 'pendiente'"
+      }
+    },
+    {
+      "task_key": "process_each_snapshot",
+      "depends_on": [{"task_key": "discover_pending"}],
+      "for_each_task": {
+        "inputs": "{{tasks.discover_pending.output.rows}}",
+        "concurrency": 2,
+        "task": {
+          "task_key": "process_snapshot",
+          "notebook_task": {
+            "notebook_path": "/Shared/curso-databricks-ai-engineer/S05-vigia-normativa-sbs-dinamico",
+            "base_parameters": {
+              "catalogo": "{{job.parameters.catalogo}}",
+              "doc_id": "{{input.doc_id}}",
+              "embedding_endpoint": "{{job.parameters.embedding_endpoint}}"
+            }
+          },
+          "environment_key": "default"
+        }
+      },
+      "environment_key": "default"
+    }
+  ],
+  "environments": [{"environment_key": "default", "spec": {"client": "1"}}]
+}
